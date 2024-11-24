@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Sharing App</title>
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Container for the whole app */
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+        }
+
+        /* Header Styles */
+        header {
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #333;
+        }
+
+        p {
+            color: #777;
+            font-size: 1rem;
+        }
+
+        /* File Upload Styles */
+        .file-upload {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .upload-btn, #download-btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 10px;
+        }
+
+        .upload-btn:hover, #download-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* File Input */
+        #file-input {
+            display: none;
+        }
+
+        /* File Info Styles */
+        .file-info {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .file-info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .file-info li {
+            background-color: #f1f1f1;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+
+        /* Button Styles */
+        #upload-btn {
+            background-color: #008CBA;
+            border: none;
+            padding: 12px 20px;
+            color: white;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        #upload-btn:hover {
+            background-color: #007B8B;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>File Sharing App</h1>
+            <p>Upload and Download Files Easily</p>
+        </header>
+
+        <div class="file-upload">
+            <input type="file" id="file-input" multiple />
+            <label for="file-input" class="upload-btn">Choose Files</label>
+        </div>
+
+        <div id="file-info" class="file-info">
+            <!-- Display file names after upload -->
+        </div>
+
+        <button id="upload-btn" class="upload-btn">Upload Files</button>
+        <button id="download-btn" class="upload-btn" style="background-color: #ff5722;">Download Files</button>
+    </div>
+
+    <script>
+        // Limit size (1GB = 1073741824 bytes)
+        const MAX_FILE_SIZE = 1073741824; // 1GB
+        const fileKey = "uploadedFiles"; // key to access files in local storage
+
+        // Load previously uploaded files from localStorage (if any)
+        let uploadedFiles = JSON.parse(localStorage.getItem(fileKey)) || [];
+
+        // Function to display files
+        function displayFiles() {
+            const fileInfo = document.getElementById("file-info");
+            fileInfo.innerHTML = ""; // Clear current file list
+
+            if (uploadedFiles.length === 0) {
+                fileInfo.innerHTML = "<p>No files uploaded yet.</p>";
+                return;
+            }
+
+            const ul = document.createElement("ul");
+
+            // List each uploaded file
+            uploadedFiles.forEach((file, index) => {
+                const li = document.createElement("li");
+                li.textContent = file.name + " (" + (file.size / 1024 / 1024).toFixed(2) + " MB)";
+                ul.appendChild(li);
+            });
+
+            fileInfo.appendChild(ul);
+        }
+
+        // Load file list on page load
+        displayFiles();
+
+        document.getElementById("file-input").addEventListener("change", function(event) {
+            const fileInput = event.target;
+            const files = fileInput.files;
+
+            const validFiles = [];
+
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].size <= MAX_FILE_SIZE) {
+                    validFiles.push(files[i]);
+                } else {
+                    alert(`File ${files[i].name} is too large. Max size is 1GB.`);
+                }
+            }
+
+            if (validFiles.length > 0) {
+                uploadedFiles = uploadedFiles.concat(validFiles); // Add valid files to the array
+                localStorage.setItem(fileKey, JSON.stringify(uploadedFiles)); // Save to localStorage
+                displayFiles(); // Update displayed file list
+                alert("Files uploaded successfully!");
+            }
+        });
+
+        document.getElementById("upload-btn").addEventListener("click", function() {
+            if (uploadedFiles.length === 0) {
+                alert("Please select valid files to upload.");
+            } else {
+                alert("Files uploaded successfully!");
+            }
+        });
+
+        document.getElementById("download-btn").addEventListener("click", function() {
+            if (uploadedFiles.length === 0) {
+                alert("No files uploaded yet.");
+            } else {
+                // Simulate downloading the files
+                uploadedFiles.forEach((file) => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(file);
+                    link.download = file.name;
+                    link.click();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
